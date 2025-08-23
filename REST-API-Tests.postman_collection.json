@@ -1,0 +1,423 @@
+{
+	"info": {
+		"_postman_id": "1d6b011a-acd2-4935-9392-04cfdd972d41",
+		"name": "Rest API tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2693139"
+	},
+	"item": [
+		{
+			"name": "create_token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"pm.collectionVariables.set(\"access_token\", jsonData.access_token);\r",
+							"\r",
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"})\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"    pm.response.to.have.responseTime.lessThan(500);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains access_token of type string\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"access_token\").that.is.a(\"string\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "testuser",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "secret",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add_new_item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"})\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"    pm.response.to.have.responseTime.lessThan(500);\r",
+							"});\r",
+							"pm.test(\"Response contains message of type string\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"message\").that.is.a(\"string\");\r",
+							"});\r",
+							"// extract item id and store it in collection variable for next API calls\r",
+							"var responseBody = pm.response.text();\r",
+							"var regex = /\\d+/;  \r",
+							"var match = responseBody.match(regex);\r",
+							"if (match) {\r",
+							"    var extractedNumber = match[0];\r",
+							"    pm.collectionVariables.set(\"item_id\", extractedNumber);\r",
+							"    console.log(\"Extracted number: \" + extractedNumber); // Log the extracted number\r",
+							"} else {\r",
+							"    console.log(\"No number found in the response.\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"item_name\": \"Samsung Galaxy\",\r\n  \"item_description\": \"8GB RAM, 8MP Front Camera\",\r\n  \"item_price\": 750\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/add-new-item",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"add-new-item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_all_items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"})\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"    pm.response.to.have.responseTime.lessThan(500);\r",
+							"});\r",
+							"pm.test(\"Response contains message of type string\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"all_items\").that.is.a(\"array\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/get-all-items",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"get-all-items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "item_details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"})\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"    pm.response.to.have.responseTime.lessThan(500);\r",
+							"});\r",
+							"pm.test(\"Response contains item id with the value obtained during add new item\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"item_id\").equal(parseInt(pm.collectionVariables.get('item_id')))\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/item/{{item_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"item",
+						"{{item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update_item_detail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"})\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"    pm.response.to.have.responseTime.lessThan(500);\r",
+							"});\r",
+							"\r",
+							"let base_url = pm.collectionVariables.get(\"base_url\");\r",
+							"let item_id = pm.collectionVariables.get(\"item_id\");\r",
+							"let accessToken = pm.collectionVariables.get(\"access_token\");\r",
+							"\r",
+							"pm.sendRequest({\r",
+							"    url: `${base_url}/item/${item_id}`,\r",
+							"    method: 'GET',\r",
+							"    header: {\r",
+							"        'Authorization': `Bearer ${accessToken}`  \r",
+							"    }\r",
+							"}, function (err, res) {\r",
+							"    if (err) {\r",
+							"        console.log(\"Error in sending GET request:\", err);\r",
+							"    } else {\r",
+							"        pm.test(\"GET request returns 200 OK with the updated details\", function () {\r",
+							"            pm.expect(res.status).to.eql(\"OK\");   \r",
+							"            const responseData = res.json();\r",
+							"            console.log(\"Response Data:\", responseData)\r",
+							"            pm.expect(responseData).to.have.property(\"item_price\").to.eql(770.0);\r",
+							"             pm.expect(responseData).to.have.property(\"item_name\").to.eql(\"Samsung Galaxy X20\");\r",
+							"        \r",
+							"        });\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"item_name\": \"Samsung Galaxy X20\",\r\n  \"item_description\": \"8GB RAM, 8MP Front Camera\",\r\n  \"item_price\": 770\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/update-item/{{item_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"update-item",
+						"{{item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete_item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"})\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"    pm.response.to.have.responseTime.lessThan(500);\r",
+							"});\r",
+							"\r",
+							"let base_url = pm.collectionVariables.get(\"base_url\");\r",
+							"let item_id = pm.collectionVariables.get(\"item_id\");\r",
+							"let accessToken = pm.collectionVariables.get(\"access_token\");\r",
+							"\r",
+							"pm.sendRequest({\r",
+							"    url: `${base_url}/item/${item_id}`,\r",
+							"    method: 'GET',\r",
+							"    header: {\r",
+							"        'Authorization': `Bearer ${accessToken}`  \r",
+							"    }\r",
+							"}, function (err, res) {\r",
+							"    if (err) {\r",
+							"        console.log(\"Error in sending GET request:\", err);\r",
+							"    } else {\r",
+							"        pm.test(\"GET request returns 404 Not Found\", function () {\r",
+							"            pm.expect(res.status).to.eql(\"Not Found\");   \r",
+							"        });\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/delete-item/{{item_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"delete-item",
+						"{{item_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "access_token",
+			"value": "0",
+			"type": "string"
+		},
+		{
+			"key": "base_url",
+			"value": "https://python-flask-apis.onrender.com",
+			"type": "string"
+		},
+		{
+			"key": "item_id",
+			"value": ""
+		}
+	]
+}
